@@ -106,6 +106,11 @@ button.on { background: var(--accent-soft); border-color: var(--accent); color: 
 .status.ok { color: var(--ok); }
 .status b { font-weight: 700; }
 
+/* 기호 단추 줄: 키보드로 치기 어려운 기호를 눌러서 넣는다 */
+.symbar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 6px 12px; border-bottom: 1px solid var(--rule); background: var(--sheet); }
+.symbar .label { font-size: 12px; color: var(--muted); margin-right: 4px; }
+.symbar button { font-family: var(--f-code); font-size: 17px; line-height: 1; padding: 5px 0; min-width: 34px; border-radius: 6px; }
+.symbar button.arrow { font-weight: 700; color: var(--accent); }
 .editor { position: relative; display: flex; height: 470px; background: var(--sheet); }
 .gutter {
   flex: none; width: 44px; overflow: hidden; text-align: right; padding: 12px 8px 12px 0; color: var(--muted);
@@ -206,6 +211,9 @@ table.g code { font-family: var(--f-code); font-size: 14px; white-space: pre; }
         <label class="speed" for="speed">느리게 <input id="speed" type="range" min="1" max="10" value="5"> 빠르게</label>
       </div>
       <div class="status" id="status">준비됐어요. ‘전체 실행’이나 ‘한 줄씩’을 눌러 보세요.</div>
+      <div class="symbar" id="symbar" role="toolbar" aria-label="기호 넣기">
+        <span class="label">기호 넣기</span>
+      </div>
       <div class="editor">
         <div class="gutter" id="gutter" aria-hidden="true"></div>
         <div class="codebox">
@@ -896,11 +904,11 @@ const EXAMPLES = [
 함수 탑_옮기기(개수, 출발, 도착, 경유):
     만약 개수 == 1 이면:
         이동_횟수 ← 이동_횟수 + 1
-        이동_횟수 + ". 1번 원판: " + 출발 + " → " + 도착 출력
+        이동_횟수 + ". 1번 원판: " + 출발 + " -> " + 도착 출력
         끝낸다
     탑_옮기기(개수 - 1, 출발, 경유, 도착)     # ① 작은 탑을 경유지로 비켜 둔다
     이동_횟수 ← 이동_횟수 + 1
-    이동_횟수 + ". " + 개수 + "번 원판: " + 출발 + " → " + 도착 출력   # ② 큰 원판을 옮긴다
+    이동_횟수 + ". " + 개수 + "번 원판: " + 출발 + " -> " + 도착 출력   # ② 큰 원판을 옮긴다
     탑_옮기기(개수 - 1, 경유, 도착, 출발)     # ③ 작은 탑을 다시 얹는다
 
 탑_옮기기(3, "A", "C", "B")
@@ -969,13 +977,13 @@ const EXAMPLES = [
     추측 ← 합을 2로 나눈 몫          # 가운데 숫자
     시도 ← 시도 + 1
     만약 추측 == 정답 이면:
-        시도 + "번째: " + 추측 + " → 정답!" 출력
+        시도 + "번째: " + 추측 + " -> 정답!" 출력
         찾았다 ← 참
     아니면 만약 추측 < 정답 이면:
-        시도 + "번째: " + 추측 + " → 업" 출력
+        시도 + "번째: " + 추측 + " -> 업" 출력
         낮은_끝 ← 추측 + 1           # 작은 쪽을 버린다
     아니면:
-        시도 + "번째: " + 추측 + " → 다운" 출력
+        시도 + "번째: " + 추측 + " -> 다운" 출력
         높은_끝 ← 추측 - 1           # 큰 쪽을 버린다
 ` },
   { id: 'ch8-howmany', chap: '8장', title: '몇 번이면 될까?',
@@ -1230,7 +1238,7 @@ const EXAMPLES = [
     주사위 ← 무작위(1, 6)
     위치 ← 위치 + 주사위
     턴 ← 턴 + 1
-    턴 + "번째: 주사위 " + 주사위 + " → " + 위치 + "칸" 출력
+    턴 + "번째: 주사위 " + 주사위 + " -> " + 위치 + "칸" 출력
 턴 + "번 만에 도착!" 출력
 ` },
   { id: 'ch11-fixed-dice', chap: '11장', title: '정해 둔 주사위로 시험하기',
@@ -1250,7 +1258,7 @@ const EXAMPLES = [
     주사위 ← 주사위_굴리기()
     위치 ← 위치 + 주사위
     턴 ← 턴 + 1
-    턴 + "번째: 주사위 " + 주사위 + " → " + 위치 + "칸" 출력
+    턴 + "번째: 주사위 " + 주사위 + " -> " + 위치 + "칸" 출력
 턴 + "번 만에 도착!" 출력
 ` },
   { id: 'ch11-two-players', chap: '11장', title: '주사위 경주 — 버전 2',
@@ -1264,7 +1272,7 @@ const EXAMPLES = [
 동안 승자 == "":
     눈 ← 무작위(1, 6)
     위치[차례] ← 위치[차례] + 눈
-    이름[차례] + ": " + 눈 + " → " + 위치[차례] + "칸" 출력
+    이름[차례] + ": " + 눈 + " -> " + 위치[차례] + "칸" 출력
     만약 위치[차례] >= 30 이면:
         승자 ← 이름[차례]
     아니면:
@@ -1291,14 +1299,14 @@ const EXAMPLES = [
 함수 특별칸_확인(칸):
     각 특 in 특별칸 대해 반복:
         만약 특.출발 == 칸 이면:
-            "   " + 특.종류 + "! " + 칸 + "칸 → " + 특.도착 + "칸" 출력
+            "   " + 특.종류 + "! " + 칸 + "칸 -> " + 특.도착 + "칸" 출력
             특.도착 반환
     칸 반환
 
 함수 한_턴(번호):
     눈 ← 주사위_굴리기()
     새_칸 ← 위치[번호] + 눈
-    이름[번호] + ": 주사위 " + 눈 + " → " + 새_칸 + "칸" 출력
+    이름[번호] + ": 주사위 " + 눈 + " -> " + 새_칸 + "칸" 출력
     위치[번호] ← 특별칸_확인(새_칸)
 
 함수 도착했나(번호):
@@ -1333,10 +1341,10 @@ const EXAMPLES = [
 함수 도착했나(번호):
     위치[번호] >= 30 반환
 
-"점프 칸 4 → " + 특별칸_확인(4) 출력
-"함정 칸 27 → " + 특별칸_확인(27) 출력
-"보통 칸 5 → " + 특별칸_확인(5) 출력
-"점프해서 간 칸 10 → " + 특별칸_확인(10) 출력
+"점프 칸 4 -> " + 특별칸_확인(4) 출력
+"함정 칸 27 -> " + 특별칸_확인(27) 출력
+"보통 칸 5 -> " + 특별칸_확인(5) 출력
+"점프해서 간 칸 10 -> " + 특별칸_확인(10) 출력
 
 위치 ← [30, 29, 33]
 "30칸: " + 도착했나(0) 출력
@@ -1362,9 +1370,9 @@ const EXAMPLES = [
         30 - (새_칸 - 30) 반환
     새_칸 반환
 
-"28 + 2 → " + 넘치면_되돌리기(28 + 2) 출력
-"28 + 5 → " + 넘치면_되돌리기(28 + 5) 출력
-"25 + 6 → " + 넘치면_되돌리기(25 + 6) 출력
+"28 + 2 -> " + 넘치면_되돌리기(28 + 2) 출력
+"28 + 5 -> " + 넘치면_되돌리기(28 + 5) 출력
+"25 + 6 -> " + 넘치면_되돌리기(25 + 6) 출력
 ` },
   { id: 'ch12-v1', chap: '12장', title: '퀴즈쇼 — 버전 1',
     hint: '하린_답을 바꿔 가며 점수가 어떻게 달라지는지 보세요.',
@@ -1397,10 +1405,10 @@ const EXAMPLES = [
     거짓 반환
 
 달_정답 ← ["12", "열두", "12달", "열두 달"]
-"12 → " + 맞았나("12", 달_정답) 출력
-"열두 달 → " + 맞았나("열두 달", 달_정답) 출력
-"열둘 → " + 맞았나("열둘", 달_정답) 출력
-"12 (뒤에 빈칸) → " + 맞았나("12 ", 달_정답) 출력
+"12 -> " + 맞았나("12", 달_정답) 출력
+"열두 달 -> " + 맞았나("열두 달", 달_정답) 출력
+"열둘 -> " + 맞았나("열둘", 달_정답) 출력
+"12 (뒤에 빈칸) -> " + 맞았나("12 ", 달_정답) 출력
 ` },
   { id: 'ch12-full', chap: '12장', title: '퀴즈쇼 — 버전 3',
     hint: '할머니의 답 하나를 틀리게 바꾸면 우승자가 어떻게 달라지는지 보세요.',
@@ -1495,10 +1503,10 @@ const EXAMPLES = [
     아니면:
         "다음엔 더 잘할 거예요" 반환
 
-"100% → " + 칭호(100) 출력
-"60% → " + 칭호(60) 출력
-"59% → " + 칭호(59) 출력
-"0% → " + 칭호(0) 출력
+"100% -> " + 칭호(100) 출력
+"60% -> " + 칭호(60) 출력
+"59% -> " + 칭호(59) 출력
+"0% -> " + 칭호(0) 출력
 ` },
   { id: 'ch12-shuffle', chap: '12장', title: '문제 순서 섞기',
     hint: '여러 번 실행해 보세요. 순서는 바뀌지만 문제가 빠지거나 겹치지 않아요.',
@@ -2338,6 +2346,24 @@ ta.addEventListener('keydown', e => {
     ta.setRangeText('\n' + ind, s, ta.selectionEnd, 'end');
     ta.dispatchEvent(new Event('input'));
   }
+});
+// 기호 단추: 누르면 커서 자리에 기호가 들어간다 (← 는 <- 로 쳐도 돼요)
+const SYMBOLS = [
+  ['←', '상자에 담기 (<- 로 쳐도 돼요)'], ['★', '별'], ['☆', '빈 별'], ['■', '네모'], ['□', '빈 네모'],
+  ['●', '동그라미'], ['○', '빈 동그라미'], ['♥', '하트'], ['◆', '마름모'], ['▲', '세모'], ['♪', '음표'],
+  ['🍀', '네잎클로버'], ['😀', '웃는 얼굴'], ['🎉', '축하'],
+];
+SYMBOLS.forEach(([ch, name]) => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.textContent = ch; b.title = name; b.setAttribute('aria-label', name + ' 넣기');
+  if (ch === '←') b.className = 'arrow';
+  b.addEventListener('mousedown', e => e.preventDefault());   // 코드 창의 커서 자리를 잃지 않게
+  b.addEventListener('click', () => {
+    ta.focus();
+    ta.setRangeText(ch, ta.selectionStart, ta.selectionEnd, 'end');
+    ta.dispatchEvent(new Event('input'));
+  });
+  $('symbar').appendChild(b);
 });
 $('btnRun').addEventListener('click', runAll);
 $('btnStep').addEventListener('click', () => { stopAuto(); stepOnce(); });
