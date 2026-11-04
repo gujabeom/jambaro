@@ -183,6 +183,37 @@ table.g th { font-size: 12px; color: var(--muted); font-weight: 500; }
 table.g code { font-family: var(--f-code); font-size: 14px; white-space: pre; }
 .foot { font-size: 12px; color: var(--muted); }
 @media (prefers-reduced-motion: reduce) { .linebar, .box { transition: none; } }
+
+/* ── 휴대폰: 실행 단추·안내 줄·출력·변수 상자를 화면 아래에 붙여 둔다(독). 코드의 노란 줄과 결과를 한눈에 본다 ── */
+.dock { display: none; }
+@media (max-width: 880px) {
+  body.has-dock .wrap { padding-bottom: calc(var(--dock-h, 320px) + 16px); }
+  body.has-dock .dock {
+    display: flex; flex-direction: column; position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+    background: var(--sheet); border-top: 1px solid var(--rule); box-shadow: 0 -8px 24px rgba(15, 22, 38, 0.18);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  body.has-dock .dock.typing { display: none; }      /* 코드를 고치는 동안은 키보드에 자리를 내준다 */
+  body.has-dock.dock-min .dock .side { display: none; }
+  .dock .toolbar { flex-wrap: nowrap; overflow-x: auto; padding: 8px 10px; gap: 5px; }
+  .dock .toolbar button { padding: 7px 8px; font-size: 13px; white-space: nowrap; flex: none; }
+  .dock .toolbar .speed { display: none; }
+  .dock .toolbar .dock-toggle { margin-left: auto; padding: 7px 9px; min-width: 34px; }
+  .dock .status { min-height: 30px; padding: 5px 12px; font-size: 12.5px; }
+  .dock .side { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 0; height: 30vh; min-height: 170px; border-top: 1px solid var(--rule); }
+  .dock .side .panel { border: 0; border-radius: 0; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+  .dock .side .panel + .panel { border-right: 1px solid var(--rule); }
+  .dock .side .panel:last-child { order: -1; }          /* 출력을 왼쪽에 */
+  .dock .panel-head { padding: 4px 10px; }
+  .dock .console { height: auto; flex: 1; font-size: 13.5px; line-height: 1.5; padding: 8px 10px; }
+  .dock .vars { max-height: none; flex: 1; padding: 8px 10px; gap: 8px; }
+  body.has-dock .editor { height: 44vh; min-height: 220px; }
+}
+@media (max-width: 360px) {
+  .dock .toolbar { gap: 4px; padding: 8px 6px; }
+  .dock .toolbar button { padding: 6px 5px; font-size: 12.5px; }
+  .dock .toolbar .dock-toggle { min-width: 28px; padding: 6px 6px; }
+}
 </style>
 </head>
 <body>
@@ -236,6 +267,8 @@ table.g code { font-family: var(--f-code); font-size: 14px; white-space: pre; }
       </section>
     </div>
   </div>
+
+  <div class="dock" id="dock" aria-label="실행 단추와 결과"></div>
 
   <details class="grammar">
     <summary>이 실행기가 알아듣는 문법</summary>
@@ -2380,6 +2413,46 @@ $('speed').addEventListener('input', () => { if (S.timer) { clearInterval(S.time
 })();
 // 테스트용
 window.__pseudo = { parseProgram, createRun, EXAMPLES };
+
+// ---------- 휴대폰 독: 좁은 화면에서는 단추·안내 줄·출력·변수 상자를 아래에 붙인다 ----------
+(() => {
+  const dock = $('dock'), toolbar = document.querySelector('.toolbar'), side = document.querySelector('.side');
+  const editorEl = document.querySelector('.editor');
+  const home = [[toolbar, toolbar.parentNode, toolbar.nextSibling], [statusEl, statusEl.parentNode, statusEl.nextSibling],
+                [side, side.parentNode, side.nextSibling]];
+  const mq = matchMedia('(max-width: 880px)');
+  // 결과 칸을 접었다 펴는 단추 (독에서만 보임)
+  const tog = document.createElement('button');
+  tog.type = 'button'; tog.className = 'dock-toggle'; tog.textContent = '▾'; tog.title = '결과 칸 접기'; tog.setAttribute('aria-label', '결과 칸 접기'); tog.hidden = true;
+  tog.addEventListener('click', () => {
+    const min = document.body.classList.toggle('dock-min');
+    tog.textContent = min ? '▴' : '▾'; tog.title = min ? '결과 칸 펴기' : '결과 칸 접기'; tog.setAttribute('aria-label', tog.title); setDockH();
+  });
+  toolbar.appendChild(tog);
+  function setDockH() { document.body.style.setProperty('--dock-h', dock.offsetHeight + 'px'); }
+  function place() {
+    if (mq.matches) {
+      dock.append(toolbar, statusEl, side); document.body.classList.add('has-dock'); tog.hidden = false;
+    } else {
+      for (const [el, parent, next] of home) parent.insertBefore(el, next && next.parentNode === parent ? next : null);
+      document.body.classList.remove('has-dock', 'dock-min'); tog.hidden = true;
+    }
+    requestAnimationFrame(setDockH);
+  }
+  (mq.addEventListener ? mq.addEventListener('change', place) : mq.addListener(place));
+  window.addEventListener('resize', () => requestAnimationFrame(setDockH));
+  place();
+  // 코드를 고치는 동안(키보드가 올라온 동안)은 독을 잠시 숨긴다
+  ta.addEventListener('focus', () => { if (mq.matches) dock.classList.add('typing'); });
+  ta.addEventListener('blur', () => { dock.classList.remove('typing'); requestAnimationFrame(setDockH); });
+  // 실행 단추를 누르면 코드 칸이 독에 가리지 않게 화면을 맞춘다
+  function showEditor() {
+    if (!mq.matches) return;
+    const r = editorEl.getBoundingClientRect(), dockTop = dock.getBoundingClientRect().top;
+    if (r.top < 0 || r.top > dockTop - 140) window.scrollTo({ top: window.scrollY + r.top - 8, behavior: 'smooth' });
+  }
+  ['btnRun', 'btnStep', 'btnAuto', 'btnReset'].forEach(id => $(id).addEventListener('click', showEditor));
+})();
 </script>
 
 </body>
