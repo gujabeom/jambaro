@@ -4,6 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>잼바로 실행기</title>
+<!-- 홈 화면에 추가(앱처럼 쓰기) -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#d6205c">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-title" content="잼바로">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2455,5 +2464,6 @@ window.__pseudo = { parseProgram, createRun, EXAMPLES };
 })();
 </script>
 
+<script src="install-banner.js"></script>
 </body>
 </html>
